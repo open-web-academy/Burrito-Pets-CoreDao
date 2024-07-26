@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "pnpm install --no-frozen-lockfile && your-build-command",
     "serve": "vite preview",
     "test": "jest",
     "lint": "eslint src --max-warnings=0",
