@@ -163,7 +163,7 @@ export default function Mint() {
                         <label style={{ color: "black", "fontWeight": "500" }}>
                           {" "}
                           Burrito’s contract to add your NFTs to wallet
-                          0xAc9221060455f60dfFF8bf8C4f601E500AC095D7
+                          0xAeb73A9a0814d3307B181564122fc9f3929c4Dca
                         </label>
                       </div>
                     </div>
