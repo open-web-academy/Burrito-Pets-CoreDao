@@ -12,7 +12,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/Mint" element={<Mint />} />
-        {/* <Route path="/Interact" element={<Interact />} /> */}
+        <Route path="/Interact" element={<Interact />} />
         <Route path="/*" element={<Home />} />
       </Routes>
     </Router>
