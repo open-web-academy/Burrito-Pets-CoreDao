@@ -88,7 +88,7 @@ module.exports = {
 
 ## Writing Smart Contract
 
-1. Dentro de la carpeta src/contract/contracts se encuentra el archivo NFTCollection.sol el cual contendrá el código del contrato inteligente a utilizar para este juego de Burrito Pets. 
+1. Inside the src/contract/contracts folder is the NFTCollection.sol file which will contain the smart contract code to be used for this Burrito Pets game.
 
 ```javascript
 // SPDX-License-Identifier: MIT

@@ -1,19 +1,15 @@
 async function main() {
-  // Obtener la red y la cuenta de despliegue
   const [deployer] = await ethers.getSigners();
 
-  console.log("Desplegando contratos con la cuenta:", deployer.address);
+  console.log("Deploy contract with the account:", deployer.address);
 
-  // Obtener el contrato que deseas desplegar
   const NFTCollection = await ethers.getContractFactory("NFTCollection");
 
-  // Desplegar el contrato
   const nftCollection = await NFTCollection.deploy();
 
-  console.log("Contrato desplegado en:", nftCollection.address);
+  console.log("Contract Address:", nftCollection.address);
 }
 
-// Ejecutar el script
 main()
   .then(() => process.exit(0))
   .catch((error) => {
