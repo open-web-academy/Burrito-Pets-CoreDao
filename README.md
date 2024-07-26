@@ -1,5 +1,10 @@
 # Burrito Pets dApp on Core
-Descripción de la dApp de Burrito pets, mencionar que es un juego tipo tamagotchi donde los usuarios pueden minar Burritos (NFT's) e interactuar con ellos (jugar, darles de comer y hacerlos dormir).
+Discover Burrito Pets, an exciting blockchain game that brings the nostalgia of Tamagotchis to the CORE network! In Burrito Pets, you can mint and collect adorable Burritos as NFTs and enjoy a unique interactive experience.
+
+## What can you do in Burrito Pets?
+
+* Mint Burritos: Start your adventure by mining and collecting Burrito NFTs, each with its own unique traits and personality.
+* Interact: Take care of your Burritos by playing with them, feeding them, and making sure they get enough rest to keep them happy and healthy.
 
 ## Software Prerequisites
 * [Git](https://git-scm.com/) v2.44.0
@@ -10,57 +15,15 @@ Descripción de la dApp de Burrito pets, mencionar que es un juego tipo tamagotc
 
 ## Setting up the development environment
 
-1. Create a new directory for the project and navigate into it
+1. Install dependencies
 
 ```bash
-mkdir dapp-
-cd dapp-tutorial
-```
-2. Install [Hardhat](https://hardhat.org/) and [Waffle](https://getwaffle.io/)
-
-```bash
-npm init --yes
-npm install --save-dev hardhat
-npm install --save-dev chai @nomiclabs/hardhat-waffle
-```
-3. Initialize Hardhat project by running the following command
-
-```bash
-npx hardhat
-```
-![dapp-tutorial-1](https://github.com/coredao-org/dapp-tutorial/assets/35759187/60930a6b-6e7a-49fc-a748-d1fd20930837)
-
-:::note
-As we will using Waffle for this project and make sure to select **No** for the option "_Do you want to install this sample project's dependencies with npm (@nomicfoundation/hardhat-toolbox)? (Y/n)_"
-:::
-
-4. Once this project is initialized, you'll find the following project structure:
-
-```bash
-dapp-tutorial.
-|   .gitignore
-|   hardhat-config.js   (HardHat configuration file.)
-|   package-lock.json
-|   package.json
-|   README.md
-| 
-+---contracts (For Solidity Smart Contracts)
-|       Lock.sol
-|       
-+---ignition (Scripts in previous versions, contains config files that specify how smart contracts should be deployed)
-|   \---modules
-|           Lock.js
-|                 
-+---node_modules
-|  
-+---test (For writing and Running Tests)
-|       Lock.js       
-|       
+npm install
 ```
 
-5. Install and configure MetaMask Chrome Extension to use with Core Testnet. Refer [here](https://docs.coredao.org/docs/Dev-Guide/core-testnet-wallet-config) for a detailed guide.
+2. Install and configure MetaMask Chrome Extension to use with Core Testnet. Refer [here](https://docs.coredao.org/docs/Dev-Guide/core-testnet-wallet-config) for a detailed guide.
 
-6. Create a secret.json file in the root folder and store the private key of your MetaMask wallet in it. Refer [here](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase) for details on how to get MetaMask account's private key.
+3. Create a secret.json file in the src/contract folder and store the private key of your MetaMask wallet in it. Refer [here](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase) for details on how to get MetaMask account's private key.
 
 ```json
 {"PrivateKey":"you private key, do not leak this file, do keep it absolutely safe"}
@@ -70,117 +33,418 @@ dapp-tutorial.
 Do not forget to add this file to the `.gitignore` file in the root folder of your project so that you don't accidentally check your private keys/secret phrases into a public repository. Make sure you keep this file in an absolutely safe place!
 :::
 
-
-7. Copy the following into your `hardhat.config.js` file
+4. Copy the following into your `hardhat.config.js` file in src/contract
 
 ```js
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 
- require('@nomiclabs/hardhat-ethers');
- require("@nomiclabs/hardhat-waffle");
 
- const { PrivateKey } = require('./secret.json');
+require('@nomiclabs/hardhat-ethers');
+require("@nomiclabs/hardhat-waffle");
 
- module.exports = {
-    defaultNetwork: 'testnet',
- 
-    networks: {
-       hardhat: {
-       },
-       testnet: {
-          url: 'https://rpc.test.btcs.network',
-          accounts: [PrivateKey],
-          chainId: 1115,
-       }
-    },
-    solidity: {
-       compilers: [
-         {
-            version: '0.8.9',
-            settings: {
-               evmVersion: 'paris',
-               optimizer: {
-                  enabled: true,
-                  runs: 200,
-               },
-            },
-         },
-       ],
-    },
-    paths: {
-       sources: './contracts',
-       cache: './cache',
-       artifacts: './artifacts',
-    },
-    mocha: {
-       timeout: 20000,
-    },
- };
- 
+
+const { PrivateKey } = require('./secret.json');
+
+
+module.exports = {
+   defaultNetwork: 'testnet',
+
+
+   networks: {
+      hardhat: {
+      },
+      testnet: {
+         url: 'https://rpc.test.btcs.network',
+         accounts: [PrivateKey],
+         chainId: 1115,
+      }
+   },
+   solidity: {
+      compilers: [
+        {
+           version: '0.8.24',
+           settings: {
+            evmVersion: 'paris',
+            optimizer: {
+                 enabled: true,
+                 runs: 200,
+              },
+           },
+        },
+      ],
+   },
+   paths: {
+      sources: './contracts',
+      cache: './cache',
+      artifacts: './artifacts',
+   },
+   mocha: {
+      timeout: 20000,
+   },
+};
 ```
 
 ## Writing Smart Contract
 
-1. Navigate to the `contracts` folder in the root directory of your project.
-2. Delete the `Lock.sol` file; create a new file `Storage.sol` and paste the following contents into it.
+1. Dentro de la carpeta src/contract/contracts se encuentra el archivo NFTCollection.sol el cual contendrá el código del contrato inteligente a utilizar para este juego de Burrito Pets. 
 
 ```javascript
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-pragma solidity >=0.7.0 <0.9.0;
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Base64.sol";
+import "hardhat/console.sol";
 
-/**
- * @title Storage
- * @dev Store & retrieve value in a variable
- */
-contract Storage {
+contract NFTCollection is ERC721URIStorage {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
 
-    uint256 number;
+    uint256 private nonce = 0;
 
-    /**
-     * @dev Store value in variable
-     * @param num value to store
-     */
-    function store(uint256 num) public {
-        number = num;
+    enum Activity {
+        Idle,
+        Playing,
+        Eating,
+        Sleeping
     }
 
-    /**
-     * @dev Return value 
-     * @return value of 'number'
-     */
-    function retrieve() public view returns (uint256){
-        return number;
+    struct Pet {
+        address owner;
+        string image;
+        string name;
+        uint256 happiness;
+        uint256 hunger;
+        uint256 sleep;
+        Activity currentActivity;
+        uint256 lastMeal;
+        uint256 lastSleep;
+        uint256 lastPlay;
+    }
+
+    struct PetInfo {
+        uint256 tokenId;
+        string image;
+        string name;
+        uint256 happiness;
+        uint256 hunger;
+        uint256 sleep;
+        string activity;
+        bool isHungry;
+        bool isSleepy;
+        bool isBored;
+    }
+
+    struct TokenURI {
+        string tokenURI;
+        string image;
+    }
+
+    mapping(uint256 => Pet) private _pets;
+
+    constructor() ERC721("Burrito Battle Virtual Pet", "BBVP") {}
+
+    function mintPet(string memory petName) external returns (uint256) {
+        _tokenIds.increment();
+        uint256 newPetId = _tokenIds.current();
+        _safeMint(msg.sender, newPetId);
+
+        TokenURI memory tokenURI = generateTokenURI(petName);
+        uint256 currentTime = block.timestamp;
+
+        _pets[newPetId] = Pet(
+            msg.sender,
+            tokenURI.image,
+            petName,
+            50,
+            0,
+            0,
+            Activity.Idle,
+            currentTime,
+            currentTime,
+            currentTime
+        );
+
+        _setTokenURI(newPetId, tokenURI.tokenURI);
+
+        return newPetId;
+    }
+
+    function play(uint256 tokenId) external {
+        require(_hasToken(tokenId), "Pet does not exist");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "You are not the owner of the token"
+        );
+
+        Pet storage pet = _pets[tokenId];
+        require(pet.currentActivity == Activity.Idle, "Pet is busy");
+
+        uint256 currentTime = block.timestamp;
+        
+        if ((currentTime - pet.lastSleep) > 16 hours) {
+            pet.happiness -= 10;
+            pet.sleep += 10;
+        }
+        require((currentTime - pet.lastSleep) < 16 hours, "Pet is tired");
+
+        //pet.currentActivity = Activity.Playing;
+        pet.lastPlay = block.timestamp;
+        pet.happiness == 50 ? 50 : pet.happiness += 10;
+        pet.hunger == 50 ? 50 : pet.hunger += 10;
+
+    }
+
+    function eat(uint256 tokenId) external {
+        require(_hasToken(tokenId), "Pet does not exist");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "You are not the owner of the token"
+        );
+
+        Pet storage pet = _pets[tokenId];
+        require(pet.currentActivity == Activity.Idle, "Pet is busy");
+        //pet.currentActivity = Activity.Eating;
+        pet.lastMeal = block.timestamp;
+        pet.hunger == 0 ? 0 : pet.hunger -= 10;
+        pet.happiness == 50 ? 50 : pet.happiness += 10;
+        pet.sleep == 50 ? 50 : pet.sleep += 10;
+    }
+
+    function doze(uint256 tokenId) external {
+        require(_hasToken(tokenId), "Pet does not exist");
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "You are not the owner of the token"
+        );
+
+        Pet storage pet = _pets[tokenId];
+        require(pet.currentActivity == Activity.Idle, "Pet is busy");
+
+        uint256 currentTime = block.timestamp;
+        if ((currentTime - pet.lastMeal) > 6 hours) {
+            pet.happiness -= 10;
+            pet.hunger += 10;
+        }
+        require((currentTime - pet.lastMeal) < 6 hours, "Pet is hungry");
+
+        //pet.currentActivity = Activity.Sleeping;
+        pet.lastSleep = block.timestamp;
+        pet.sleep == 0 ? 0 : pet.sleep -= 10;
+        pet.happiness == 0 ? 0 : pet.happiness -= 10;
+    }
+
+    function getMintedTokens() external view returns (uint256) {
+        return _tokenIds._value;
+    }
+
+    function checkStatus(uint256 petId)
+        internal
+        view
+        returns (
+            string memory,
+            string memory,
+            uint256,
+            uint256,
+            uint256,
+            string memory,
+            bool,
+            bool,
+            bool
+        )
+    {
+        require(_hasToken(petId), "Pet does not exist");
+        Pet storage pet = _pets[petId];
+        string memory activity = getActivityString(pet.currentActivity);
+
+        uint256 currentTime = block.timestamp;
+
+        bool isHungry = (currentTime - pet.lastMeal) > 6 hours || pet.hunger == 50;
+        bool isSleepy = (currentTime - pet.lastSleep) > 16 hours || pet.sleep == 50;
+        bool isBored = (currentTime - pet.lastPlay) > 3 hours || pet.happiness <= 20;
+
+        return (
+            pet.image,
+            pet.name,
+            pet.happiness,
+            pet.hunger,
+            pet.sleep,
+            activity,
+            isHungry,
+            isSleepy,
+            isBored
+        );
+    }
+
+    function getTokenInfoById(uint256 tokenId)
+        external
+        view
+        returns (PetInfo memory)
+    {
+        require(
+            ownerOf(tokenId) == msg.sender,
+            "You are not the owner of the token"
+        );
+
+        (
+            string memory image,
+            string memory name,
+            uint256 happiness,
+            uint256 hunger,
+            uint256 sleep,
+            string memory activity,
+            bool isHungry,
+            bool isSleepy,
+            bool isBored
+        ) = checkStatus(tokenId);
+
+        return
+            convertToPetInfo(
+                tokenId,
+                image,
+                name,
+                happiness,
+                hunger,
+                sleep,
+                activity,
+                isHungry,
+                isSleepy,
+                isBored
+            );
+    }
+
+    function convertToPetInfo(
+        uint256 tokenId,
+        string memory image,
+        string memory name,
+        uint256 happiness,
+        uint256 hunger,
+        uint256 sleep,
+        string memory activity,
+        bool isHungry,
+        bool isSleepy,
+        bool isBored
+    ) private pure returns (PetInfo memory) {
+        return
+            PetInfo({
+                tokenId: tokenId,
+                image: image,
+                name: name,
+                happiness: happiness,
+                hunger: hunger,
+                sleep: sleep,
+                activity: activity,
+                isHungry: isHungry,
+                isSleepy: isSleepy,
+                isBored: isBored
+            });
+    }
+
+    function generateTokenURI(string memory petName)
+        private
+        returns (TokenURI memory)
+    {
+        uint256 randomImageIndex = random() % 3; // 3 different images
+
+        string[3] memory images = [
+            "https://pin.ski/3Jjp95g",
+            "https://pin.ski/3NwRR57",
+            "https://pin.ski/3JfJ1X6"
+        ];
+
+        string memory json = string(
+            abi.encodePacked(
+                '{"name": "',
+                petName,
+                '", "description": "A virtual pet NFT", "image": "',
+                images[randomImageIndex],
+                '", "attributes": [{"trait_type": "Happiness", "value": "',
+                toString(_pets[_tokenIds.current()].happiness),
+                '"}, {"trait_type": "Hunger", "value": "',
+                toString(_pets[_tokenIds.current()].hunger),
+                '"}, {"trait_type": "Activity", "value": "',
+                getActivityString(_pets[_tokenIds.current()].currentActivity),
+                '"}]}'
+            )
+        );
+
+        string memory token = string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                bytes(Base64.encode(bytes(json)))
+            )
+        );
+
+        TokenURI memory tokenURI = TokenURI(
+            token,
+            string(images[randomImageIndex])
+        );
+
+        return tokenURI;
+    }
+
+    function random() private returns (uint256) {
+        nonce++;
+        return
+            uint256(
+                keccak256(abi.encodePacked(block.timestamp, msg.sender, nonce))
+            );
+    }
+
+    function getActivityString(Activity activity)
+        private
+        pure
+        returns (string memory)
+    {
+        if (activity == Activity.Playing) {
+            return "Playing";
+        } else if (activity == Activity.Eating) {
+            return "Eating";
+        } else if (activity == Activity.Sleeping) {
+            return "Sleeping";
+        } else {
+            return "Idle";
+        }
+    }
+
+    function toString(uint256 value) private pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT license
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
+
+    function _hasToken(uint256 tokenId) internal view returns (bool) {
+        try this.ownerOf(tokenId) returns (address) {
+            return true;
+        } catch {
+            return false;
+        }
     }
 }
 ```
-### Explanation
-The `Storage` contract is a simple example that demonstrates how to store and retrieve a value using a Solidity smart contract. It consists of a state variable to hold the value and two functions to update and read this value. The `store` function allows any user to set the value, while the `retrieve` function allows any user to read the current value. This contract can be useful for understanding the basics of state variables and function visibility in Solidity. This Solidity smart contract, named `Storage`, is a simple contract that allows storing and retrieving a single `uint256` value. Here’s a detailed breakdown of its components and functionality:
-
-#### Contract Components
-
-1. **State Variable**:
-   - `number`: A `uint256` variable that is used to store the value.
-
-#### Contract Functions
-
-1. **Store Function**:
-   - `store(uint256 num) public`: A function that allows users to store a new value in the `number` variable. This function takes a single parameter, `num`, which is the value to be stored. The function updates the `number` variable with the provided value.
-   - **Visibility**: The function is marked as `public`, meaning it can be called by any user or contract.
-   - **State Change**: This function modifies the state of the contract by updating the `number` variable.
-
-2. **Retrieve Function**:
-   - `retrieve() public view returns (uint256)`: A function that returns the current value stored in the `number` variable. This function does not take any parameters and returns a `uint256` value.
-   - **Visibility**: The function is marked as `public`, meaning it can be called by any user or contract.
-   - **View**: The function is marked as `view`, indicating that it does not modify the state of the contract. It only reads the state.
-   - **Return Value**: The function returns the value of the `number` variable.
-
 
 ## Compiling Smart Contract
 
-1. To compile the `Storage` smart contract defined in the `Storage.sol`, from the root directory run the following command
+1. To compile the `NFTCollection` smart contract defined in the `NFTCollection.sol`, from the src/contract directory run the following command
 
 ```bash
 npx hardhat compile
@@ -190,120 +454,47 @@ npx hardhat compile
 
 1. Before deploying your smart contract on the Core Chain, it is best adviced to first run a series of tests making sure that the smart contract is working as desired. Refer to the detailed guide [here](https://docs.coredao.org/docs/Dev-Guide/hardhat#contract-testing) for more details.
 
-2. Create a `scripts` folder in the root directory of your project. Inside this folder, create a file `deploy-and-call.js`; paste the following script into it.
+2. Create a `scripts` folder in the src/contract directory of your project. Inside this folder, create a file `deploy.js`; paste the following script into it.
 
 ```javascript
-const hre = require("hardhat");
-
 async function main() {
-  const Storage = await hre.ethers.getContractFactory("Storage");
-  const storage = await Storage.deploy();
+  const [deployer] = await ethers.getSigners();
 
-  await storage.deployed();
-  console.log("Storage contract deployed to:", storage.address);
+  console.log("Deploy contract with the account:", deployer.address);
 
-  console.log("call retrieve():", await storage.retrieve())
+  const NFTCollection = await ethers.getContractFactory("NFTCollection");
 
-  console.log("call store(), set value to 100")
-  const tx = await storage.store(100)
-  await tx.wait()
-  
-  console.log("call retrieve() again:", await storage.retrieve())
+  const nftCollection = await NFTCollection.deploy();
+
+  console.log("Contract Address:", nftCollection.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+
 ```
 3. Make sure your MetaMask wallet has tCORE test tokens for the Core Testnet. Refer [here](https://docs.coredao.org/docs/Dev-Guide/core-faucet) for details on how to get tCORE tokens from Core Faucet. 
 
 4. Run the following command from the root directory of your project, to deploy your smart contract on the Core Chain.
 
 ```bash
-npx hardhat run scripts/deploy-and-call.js
+npx hardhat run scripts/deploy.js
 ```
 
-If succesfully deployed, you will get the following output
+## Setting up Frontend
 
-```bash
->npx hardhat run scripts/deploy-and-call.js
-Storage contract deployed to: 0x48F68BF4A1b1fE6589B9D0a5ad0dF0520582edA2
-call retrieve(): BigNumber { value: "0" }
-call store(), set value to 100
-call retrieve() again: BigNumber { value: "100" }
-```
-5. Make sure to save the Address of Storage Contract at which is deployed, as obtained above, this will be used for interacting with smart contract from the dApp's frontend.
-
-🎉 Congratulations! You have successfully learned how to create, compile, and deploy a smart contract on the Core Chain Testnet using the Hardhat. 
-
-## Interacting with Smart Contract through Frontend
-
-⚡️ Let's create a frontend interface for interacting with the smart contract.
-
-### Setting up Frontend
-
-1. Clone the `dApp-tutorial` repository from GitHub using the following command.
-
-```bash
-git clone https://github.com/coredao-org/dapp-tutorial.git
-```
-
-2. Navigate into the folder `01-Basic Full Stack Dapp on Core` in the cloned `dapp-tutorial` repo.
-
-```bash
-cd dapp-tutorial
-cd "01-Basic Full Stack Dapp on Core"
-```
-
-3. Install all the dependencies, i.e., node modules.
+1. Install all the dependencies, i.e., node modules.
 
 ```bash
 npm install
 ```
 
-4. To test if things are working fine, run the application by using the following command. This will serve applciation with hot reload feature at [http://localhost:5173](http://localhost:5173/)
+2. To test if things are working fine, run the application by using the following command. This will serve applciation with hot reload feature at [http://localhost:5173](http://localhost:5173/)
 
 ```bash
 npm run dev
 ```
-
-### Key Implementations
-The application's key blockchain logic is implemented in [App.tsx](https://github.com/coredao-org/dapp-tutorial/blob/master/01-Simple%20Storage%20Full%20Stack%20Dapp/src/components/App.tsx)
-
-
-1. [App.tsx (Wallet)](https://github.com/coredao-org/dapp-tutorial/blob/master/01-Simple%20Storage%20Full%20Stack%20Dapp/src/components/App.tsx#L20): logic for connecting the application to MetaMask wallet.
-2. [App.tsx (Store)](https://github.com/coredao-org/dapp-tutorial/blob/master/01-Simple%20Storage%20Full%20Stack%20Dapp/src/components/App.tsx#L58): logic to write data to the Storage smart contract.
-3. [App.tsx (Retrieve)](https://github.com/coredao-org/dapp-tutorial/blob/master/01-Simple%20Storage%20Full%20Stack%20Dapp/src/components/App.tsx#L87): logic to read data from the Storage smart contract.
-
-
-### Adding Smart Contract Details 
-1. Copy the `Storage.sol` file from the `contracts` folder in the root of oyur project and paste it into the `frontend/src/contracts` folder. 
-2. Copy the address of the Storage smart contract as obtained in the section [above](#deploy-and-interact-with-smart-contract).
-3. Paste this into [Line 10 of App.tsx](https://github.com/coredao-org/dapp-tutorial/blob/master/01-Simple%20Storage%20Full%20Stack%20Dapp/src/components/App.tsx#L10). 
-
-```javascript
-const contractAddress = '0x48F68BF4A1b1fE6589B9D0a5ad0dF0520582edA2'
-```
-
-4. Additionally, we'll need the ABI metadata to interact with the contract from our dApp. From the `artifacts/contracts` folder in the root of your project. Copy the `Storage.json` file and save it to the `/src/contracts` folder.
-
-## Test Locally Using MetaMask
-
-1. Run the command `npm run dev` from teh root of the project to start the application. This will serve applciation with at [http://localhost:5173](http://localhost:5173/)
-
-2. Make sure that your MetaMask wallet is correctly installed and switched to Core Testnet as described in our [Core Testnet user guide](https://docs.coredao.org/docs/Dev-Guide/core-testnet-wallet-config). You'll also need to connect your MetaMask wallet to the local site.
-
-![dapp-1](https://github.com/coredao-org/dapp-tutorial/assets/35759187/1c493569-1899-4cfe-a051-02579549f916)
-
-3. Enter a number in the input field and click the **store** button to save it to the contract. A write action on the smart contract invokes the MetaMask wallet. Click the **Confirm** button to sign the transaction and wait for confirmation on the blockchain.
-
-![dapp-2](https://github.com/coredao-org/dapp-tutorial/assets/35759187/21aeeb00-a2b7-402d-9909-a2d3cdb36a5d)
-
-4. After the transaction is confirmed on the blockchain, click the **retrieve** button to read the value from the smart contract. You will notice the value has been updated.
-
-![dapp-3](https://github.com/coredao-org/dapp-tutorial/assets/35759187/f284a64d-16dd-44ef-9f24-cd9175465e0a)
-
-🎉 Congratulations! You've just interacted with your newly-deployed contract using your dApp's front end! You can build on the codebase by deploying and interacting with different contracts, and by adding new UI components to the website for your users.

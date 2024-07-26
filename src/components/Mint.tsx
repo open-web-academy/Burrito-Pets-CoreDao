@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { ItemBackground, ItemContainer, ItemHeader, ItemTitle, ItemImage, ItemBody, ItemMintNumber, ItemMintButton } from "../style/MintPageStyle";
 import React, { useCallback, useEffect, useState } from "react";
 import { ethers } from 'ethers'
-import NFTCollection from '../contract/NFTCollection.json'
+import NFTCollection from '../contractABI/NFTCollection.json'
 
 const contractAddress = '0xAeb73A9a0814d3307B181564122fc9f3929c4Dca'
 const abi = NFTCollection.abi

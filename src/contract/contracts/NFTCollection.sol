@@ -192,7 +192,6 @@ contract NFTCollection is ERC721URIStorage {
         view
         returns (PetInfo memory)
     {
-        require(_hasToken(tokenId), "Token does not exist");
         require(
             ownerOf(tokenId) == msg.sender,
             "You are not the owner of the token"
