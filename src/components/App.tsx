@@ -11,8 +11,8 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
-        {/* <Route path="/Mint" element={<Mint />} />
-        <Route path="/Interact" element={<Interact />} /> */}
+        <Route path="/Mint" element={<Mint />} />
+        {/* <Route path="/Interact" element={<Interact />} /> */}
         <Route path="/*" element={<Home />} />
       </Routes>
     </Router>

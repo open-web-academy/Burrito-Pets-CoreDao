@@ -23,7 +23,7 @@ npm install
 
 2. Install and configure MetaMask Chrome Extension to use with Core Testnet. Refer [here](https://docs.coredao.org/docs/Dev-Guide/core-testnet-wallet-config) for a detailed guide.
 
-3. Create a secret.json file in the src/contract folder and store the private key of your MetaMask wallet in it. Refer [here](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase) for details on how to get MetaMask account's private key.
+3. Create a secret.json file in the /contract folder and store the private key of your MetaMask wallet in it. Refer [here](https://metamask.zendesk.com/hc/en-us/articles/360015290032-How-to-reveal-your-Secret-Recovery-Phrase) for details on how to get MetaMask account's private key.
 
 ```json
 {"PrivateKey":"you private key, do not leak this file, do keep it absolutely safe"}
@@ -33,7 +33,7 @@ npm install
 Do not forget to add this file to the `.gitignore` file in the root folder of your project so that you don't accidentally check your private keys/secret phrases into a public repository. Make sure you keep this file in an absolutely safe place!
 :::
 
-4. Copy the following into your `hardhat.config.js` file in src/contract
+4. Copy the following into your `hardhat.config.js` file in /contract
 
 ```js
 /**
@@ -88,7 +88,7 @@ module.exports = {
 
 ## Writing Smart Contract
 
-1. Inside the src/contract/contracts folder is the NFTCollection.sol file which will contain the smart contract code to be used for this Burrito Pets game.
+1. Inside the /contract/contracts folder is the NFTCollection.sol file which will contain the smart contract code to be used for this Burrito Pets game.
 
 ```javascript
 // SPDX-License-Identifier: MIT
@@ -444,7 +444,7 @@ contract NFTCollection is ERC721URIStorage {
 
 ## Compiling Smart Contract
 
-1. To compile the `NFTCollection` smart contract defined in the `NFTCollection.sol`, from the src/contract directory run the following command
+1. To compile the `NFTCollection` smart contract defined in the `NFTCollection.sol`, from the /contract directory run the following command
 
 ```bash
 npx hardhat compile
@@ -454,7 +454,7 @@ npx hardhat compile
 
 1. Before deploying your smart contract on the Core Chain, it is best adviced to first run a series of tests making sure that the smart contract is working as desired. Refer to the detailed guide [here](https://docs.coredao.org/docs/Dev-Guide/hardhat#contract-testing) for more details.
 
-2. Create a `scripts` folder in the src/contract directory of your project. Inside this folder, create a file `deploy.js`; paste the following script into it.
+2. Create a `scripts` folder in the /contract directory of your project. Inside this folder, create a file `deploy.js`; paste the following script into it.
 
 ```javascript
 async function main() {
